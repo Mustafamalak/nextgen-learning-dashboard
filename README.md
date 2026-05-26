@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NextGen Learning Dashboard
 
-## Getting Started
+A dark, futuristic learning dashboard built for the Frontend Intern Challenge.
 
-First, run the development server:
+## Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| Layer       | Technology                    |
+|-------------|-------------------------------|
+| Framework   | Next.js 16 (App Router)       |
+| Language    | TypeScript                    |
+| Styling     | Tailwind CSS v4               |
+| Animations  | Framer Motion v12             |
+| Icons       | Lucide React                  |
+| Database    | Supabase (coming next step)   |
+
+## Architecture
+
+```
+app/
+  dashboard/
+    loading.tsx       # Skeleton bento grid (CSS pulse only)
+    page.tsx          # Server Component — serves data as props
+  globals.css         # Design tokens + Tailwind theme mapping
+  layout.tsx          # Root layout with metadata + radial glow
+  page.tsx            # Redirects / → /dashboard
+
+components/
+  dashboard/
+    ActivityTile.tsx  # Heatmap grid (no chart library)
+    BentoGrid.tsx     # Staggered entrance grid (Framer Motion)
+    CourseCard.tsx    # Course with scaleX progress animation
+    DashboardClient.tsx  # "use client" shell — no data fetching
+    HeroTile.tsx      # Welcome + streak card
+    Sidebar.tsx       # Responsive: left / icon-only / bottom nav
+    SkeletonTile.tsx  # Reusable skeleton placeholder
+  ui/
+    GlowCard.tsx      # Reusable motion.article with hover glow
+
+lib/
+  icon-map.ts         # Lucide icon resolver with fallback
+  supabase-server.ts  # Supabase server client (stub — next step)
+  types.ts            # Course TypeScript interface
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 1. Clone
+git clone https://github.com/Mustafamalak/nextgen-learning-dashboard.git
+cd nextgen-learning-dashboard
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 2. Install dependencies
+npm install
 
-## Learn More
+# 3. Configure environment
+cp .env.example .env.local
+# Fill in NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-To learn more about Next.js, take a look at the following resources:
+# 4. Run dev server
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000) — you will be redirected to `/dashboard`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Key Design Decisions
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Server/Client boundary**: `app/dashboard/page.tsx` is a pure Server Component. Data is passed to `DashboardClient` via props. No Supabase fetching happens in client components.
+- **Animation safety**: All animations use `opacity` and `transform` (scale, scaleX). Width, height, margin, and padding are never animated to avoid layout shifts.
+- **Responsive sidebar**: Left sidebar (desktop) → icon-only (tablet) → bottom nav (mobile). Framer Motion `layoutId` provides the animated active indicator.
+- **Progress bars**: Use `scaleX` MotionValue + `useSpring` triggered by `useInView` — no `width` animation.
